@@ -1,0 +1,23 @@
+{
+  "name": "automated-testing-jest-playwright-ts",
+  "version": "1.0.0",
+  "description": "Automated Testing Typescript template project using Jest and PlayWright",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Fernando Garcia Llorente",
+  "dependencies": {
+    "jest": "^26.1.0",
+    "jest-circus": "^26.1.0",
+    "jest-html-reporters": "^2.0.1",
+    "jest-junit": "^10.0.0",
+    "jest-playwright-preset": "^0.2.5",
+    "playwright": "^1.1.1",
+    "playwright-core": "^1.1.1",
+    "ts-jest": "^26.1.1",
+    "typescript": "^3.9.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.3"
+  }
+}
