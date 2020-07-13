@@ -23,11 +23,11 @@ export default class YoutubeNavigation extends Authentication {
     }
 
     public async loadYoutubeSearch(): Promise<void> {
-        // this.youtubeSearchTextInput.loadedTextInput()
+        // await this.youtubeSearchTextInput.loadedTextInput()
         expect(AvailableState.enabled).toBe(true)
     }
 
     public async fillYoutubeSearchForm(fillText: string): Promise<void> {
-        // this.youtubeSearchTextInput.fillValueElementTextInput(fillText)
+        // await this.youtubeSearchTextInput.fillValueElementTextInput(fillText)
     }
 }

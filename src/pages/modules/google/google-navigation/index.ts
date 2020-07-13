@@ -23,10 +23,10 @@ export default class GoogleNavigation extends Authentication {
     }
 
     public async loadGoogleSearch(): Promise<void> {
-        // this.youtubeSearchTextInput.loadedTextInput()
+        // await this.youtubeSearchTextInput.loadedTextInput()
         expect(AvailableState.enabled).toBe(true)    }
 
     public async fillGoogleSearchForm(fillText: string): Promise<void> {
-        // this.googleSearchTextInput.fillValueElementTextInput(fillText)
+        // await this.googleSearchTextInput.fillValueElementTextInput(fillText)
     }
 }
