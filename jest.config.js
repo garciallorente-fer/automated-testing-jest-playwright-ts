@@ -60,13 +60,15 @@ module.exports = {
     // A set of global variables that need to be available in all test environments
     // globals: {},
 
-    // The maximum amount of workers used to run your tests. Can be specified as % or a number. E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
+    // The maximum amount of workers used to run your tests.
+    // Can be specified as % or a number.
+    // E.g. maxWorkers: 10% will use 10% of your CPU amount + 1 as the maximum worker number. maxWorkers: 2 will use a maximum of 2 workers.
     // maxWorkers: "50%",
 
     // An array of directory names to be searched recursively up from the requiring module's location
     moduleDirectories: [
-      "node_modules",
-      "src"
+        'node_modules',
+        'src'
     ],
 
     // An array of file extensions your modules use
@@ -92,24 +94,23 @@ module.exports = {
     // notifyMode: "failure-change",
 
     // A preset that is used as a base for Jest's configuration
-    preset: "jest-playwright-preset",
+    preset: 'jest-playwright-preset',
 
     // Run tests from one or more projects
     // projects: undefined,
 
     // Use this configuration option to add custom reporters to Jest
     reporters: [
-      "default",
-      ["jest-junit", {
-        "suiteName": "Automated Testing template project",
-        "outputDirectory": "./reports",
-        "outputName": "automated-testing-results.xml",
-        "includeConsoleOutput": true
-      }],
-      ["jest-html-reporters", {
-        "publicPath": "./reports",
-        "filename": "automated-testing-report.html"
-      }]
+        'default',
+        ['jest-junit', {
+            'suiteName': 'automated-testing-jest-playwright-ts',
+            'outputDirectory': './reports',
+            'outputName': 'jest-playwright-test-automation-results.xml'
+        }],
+        ['jest-html-reporters', {
+            'publicPath': './reports',
+            'filename': 'jest-playwright-test-automation-report.html'
+        }]
     ],
 
     // Automatically reset mock state between every test
@@ -129,7 +130,7 @@ module.exports = {
 
     // A list of paths to directories that Jest should use to search for files in
     roots: [
-      "<rootDir>/src"
+        '<rootDir>/src'
     ],
 
     // Allows you to use a custom runner instead of Jest's default test runner
@@ -145,7 +146,7 @@ module.exports = {
     // snapshotSerializers: [],
 
     // The test environment that will be used for testing
-    testEnvironment: "./screenshots.config.js", // That extends from Jest-PlayWright-Preset environment
+    testEnvironment: './custom.config.js', // That extends from Jest-PlayWright-Preset environment
 
     // Options that will be passed to the testEnvironment
     // testEnvironmentOptions: {},
@@ -155,9 +156,9 @@ module.exports = {
 
     // The glob patterns Jest uses to detect test files
     testMatch: [
-      "**/?(*.)+(test).[t]s"
-      // "**/__tests__/**/*.[jt]s?(x)",
-      // "**/?(*.)+(spec|test).[tj]s?(x)"
+        '**/?(*.)+(test).[t]s'
+        // "**/__tests__/**/*.[jt]s?(x)",
+        // "**/?(*.)+(spec|test).[tj]s?(x)"
     ],
 
     // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
@@ -172,7 +173,8 @@ module.exports = {
     // testResultsProcessor: undefined,
 
     // This option allows use of a custom test runner
-    testRunner: "jest-circus/runner",
+    // testRunner: 'jest-circus/runner',
+    // JEST CIRCUS TAKEN AWAY FROM PACKAGE.JSON
 
     // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
     // testURL: "http://localhost",
@@ -181,14 +183,15 @@ module.exports = {
     // timers: "real",
 
     // A map from regular expressions to paths to transformers
-    transform: { "^.+\\.ts$": "ts-jest" },
+    transform: { '^.+\\.ts$': 'ts-jest' },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
     // transformIgnorePatterns: [
     //   "\\\\node_modules\\\\"
     // ],
 
-    // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
+    // An array of regexp pattern strings that are matched against all modules
+    // before the module loader will automatically return a mock for them
     // unmockedModulePathPatterns: undefined,
 
     // Indicates whether each individual test should be reported during the run
@@ -200,5 +203,6 @@ module.exports = {
     // Whether to use watchman for file crawling
     // watchman: true,
 
-    testTimeout: 35000 // Playwright default timeout is 30 seconds for waiting for an specific element
-  }
+    testTimeout: 65000 // Each "test()" timeout
+    // Jest default timeout is 15000
+}

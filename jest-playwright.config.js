@@ -1,11 +1,11 @@
 module.exports = {
-    // launchBrowserApp: {
-    //   headless: false
+    // launchOptions: {
+    //     headless: false
     // },
-    // context: {
-    //   ignoreHTTPSErrors: true,
-    //   viewport: { width: 1920, height: 1080 }
+    // contextOptions: {
+    //     viewport: { width: 1600, height: 900 }
     // },
-    browsers: ["chromium"] // , "webkit", "firefox"
-    // devices: []
-  }
+
+    browsers: ['chromium'] // 'chromium', 'webkit', 'firefox'
+    // devices: ['iPhone 11']
+}
