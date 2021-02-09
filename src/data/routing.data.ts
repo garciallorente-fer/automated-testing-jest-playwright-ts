@@ -1,6 +1,2 @@
-export enum RoutingData {
-    baseUrl = '',
-    googleUrl = 'https://www.google.com',
-    youtubeUrl = 'https://www.youtube.com',
-    home = '/'
-  }
+export const wikipediaUrl = 'https://www.wikipedia.org/'
+export const englishWikipediaUrl = 'https://en.wikipedia.org/'

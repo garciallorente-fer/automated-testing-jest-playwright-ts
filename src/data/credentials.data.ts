@@ -1,19 +1,7 @@
-export enum UserRole {
-    ROLE = 'ROLE'
-}
+import { LoginData } from 'modules/login/model/data.model'
 
-export interface UserCredentials {
-    username: string
-    password: string
-    role: UserRole
-    forename: string
-    surname: string
-}
 
-export const exampleCredentials: UserCredentials = Object.freeze({
-    role: UserRole.ROLE,
-    username: 'example@username.com',
-    password: 'examplePassword1!',
-    forename: 'ExampleForename',
-    surname: 'ExampleSurname'
-})
+export const loginCredentials: LoginData = {
+    userEmail: 'user@email.com',
+    userPassword: 'userPassword01!'
+}
