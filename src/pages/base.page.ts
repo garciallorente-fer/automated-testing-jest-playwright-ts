@@ -7,7 +7,7 @@ export class BasePage {
 
     public page: {
         readonly name: string
-        readonly url: string
+        url: string
         readonly title: string
     }
 

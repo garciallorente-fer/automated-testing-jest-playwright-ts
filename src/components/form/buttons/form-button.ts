@@ -1,4 +1,4 @@
-import { FormElement } from '../form.element'
+import { FormElement } from 'components/form/form.element'
 
 
 export class FormButton extends FormElement {

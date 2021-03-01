@@ -2,6 +2,7 @@ import { ElementHandle, JSHandle } from 'playwright-core'
 import { disabledProperty, classNameProperty } from 'components/data'
 import waitForExpect from 'wait-for-expect'
 
+
 export class Element {
 
     protected readonly selector: string
@@ -69,8 +70,7 @@ export class Element {
                 }, 30000)
             }
         } catch (error) {
-            error.message =
-                error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
+            error.message = error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
             throw error
         }
     }
@@ -93,14 +93,13 @@ export class Element {
                 return
             }
             await waitForExpect(async () => {
-                expect(await element.isEnabled() && await element.isEditable()).toBeTruthy()
+                expect(await element.isEnabled()).toBeTruthy()
             }, 30000)
             await waitForExpect(async () => {
                 expect(await this.getElementProperty<boolean>([classNameProperty])).not.toContain(disabledProperty)
             }, 30000)
         } catch (error) {
-            error.message =
-                error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
+            error.message = error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
             throw error
         }
     }
@@ -122,6 +121,17 @@ export class Element {
     }
 
 
+    public async getInnerElement(innerElementSelector: string): Promise<ElementHandle<SVGElement | HTMLElement>> {
+        const element = await this.getElement()
+        return await element.waitForSelector(innerElementSelector)
+    }
+
+    public async getInnerElements(innerElementsSelector: string): Promise<ElementHandle<SVGElement | HTMLElement>[]> {
+        const element = await this.getElement()
+        return await element.$$(innerElementsSelector)
+    }
+
+
     public async checkExistingText(text: string): Promise<void> {
         const element = await this.getElement()
         await element.waitForSelector(`text=${text}`)
@@ -129,7 +139,13 @@ export class Element {
 
 
     public async notExists(): Promise<void> {
-        await expect(page).not.toHaveSelector(this.selector, { timeout: 250 })
+        await expect(page).not.toHaveSelector(this.selector, { timeout: 500 })
+    }
+
+
+    public async innerNotExists(innerElementsSelector: string): Promise<void> {
+        const element = await this.getElement()
+        await expect(element).not.toHaveSelector(innerElementsSelector, { timeout: 500 })
     }
 
 }
