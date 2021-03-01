@@ -5,6 +5,7 @@ export type API = {
     readonly url: string
     readonly searchParams?: string[]
     readonly status?: number
+    readonly avoidParams?: string[]
 }
 
 export abstract class ApiInterception {
@@ -15,6 +16,7 @@ export abstract class ApiInterception {
             const response = await page.waitForResponse(
                 (response: Response) =>
                     ApiInterception.urlIncludes(response.url(), api.url, api.searchParams)
+                    && ApiInterception.urlNotIncludes(response.url(), api.avoidParams)
                     && (api.status === response.status() || response.ok())
             )
             return await response.json() as T
@@ -30,6 +32,7 @@ export abstract class ApiInterception {
             const request = await page.waitForRequest(
                 (request: Request) =>
                     ApiInterception.urlIncludes(request.url(), api.url, api.searchParams)
+                    && ApiInterception.urlNotIncludes(request.url(), api.avoidParams)
                     && request.failure() === null
             )
             return request.postDataJSON() as T
@@ -52,11 +55,18 @@ export abstract class ApiInterception {
     }
 
 
-    private static urlIncludes(responseUrl: string, apiUrl: string, params?: string[]): boolean {
-        responseUrl = responseUrl.toLowerCase()
+    private static urlIncludes(url: string, apiUrl: string, params?: string[]): boolean {
+        url = url.toLowerCase()
         return (
-            responseUrl.includes(apiUrl.toLowerCase())
-            && (params ? params.every(param => responseUrl.includes(encodeURIComponent(param).toLowerCase())) : true)
+            url.includes(apiUrl.toLowerCase())
+            && (params ? params.every(param => url.includes(encodeURIComponent(param).toLowerCase())) : true)
+        )
+    }
+
+    private static urlNotIncludes(url: string, avoidParams?: string[]): boolean {
+        url = url.toLowerCase()
+        return (
+            avoidParams ? avoidParams.every(avoidParam => !url.includes(encodeURIComponent(avoidParam).toLowerCase())) : true
         )
     }
 

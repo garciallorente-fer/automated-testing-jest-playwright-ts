@@ -1,27 +1,27 @@
 import { ElementHandle } from 'playwright-core'
 
 
-export class Div {
+export class Dialog {
 
-    protected readonly divSelector: string
+    protected readonly dialogSelector: string
 
-    constructor(divSelector: string) {
-        this.divSelector = divSelector
+    constructor(dialogSelector: string) {
+        this.dialogSelector = dialogSelector
     }
 
 
     protected async getDiv(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        return await page.waitForSelector(this.divSelector, { state: 'attached' })
+        return await page.waitForSelector(this.dialogSelector, { state: 'attached' })
     }
 
 
     public async exists(): Promise<void> {
-        await expect(page).toHaveSelector(this.divSelector)
+        await expect(page).toHaveSelector(this.dialogSelector)
     }
 
 
     public async notExists(): Promise<void> {
-        await expect(page).not.toHaveSelector(this.divSelector, { timeout: 250 })
+        await expect(page).not.toHaveSelector(this.dialogSelector, { timeout: 500 })
     }
 
 }
