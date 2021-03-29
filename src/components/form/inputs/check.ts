@@ -14,14 +14,10 @@ export class CheckInput extends FormElement {
 
 
     protected async getElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        if(this.checkValues){
+        if (this.checkValues) {
             return await this.getElementByValue(this.checkValues)
         } else {
-            if (this.parentEngineSelector) {
-                const parentElement = await page.waitForSelector(this.parentEngineSelector, { state: 'attached', timeout: 10000 })
-                return await parentElement.waitForSelector(this.selector, { state: 'attached', timeout: 10000 })
-            }
-            return await page.waitForSelector(this.selector, { state: 'attached', timeout: 10000 })
+            return await page.waitForSelector(this.selector, { state: 'attached' })
         }
     }
 

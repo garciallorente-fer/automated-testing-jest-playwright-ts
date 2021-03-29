@@ -10,34 +10,56 @@ export type API = {
 
 export abstract class ApiInterception {
 
+    private static readonly timeoutApi = 85000
 
-    static async waitForResponseObject<T>(api: API): Promise<T> {
+
+    static async waitForResponseObject<T>(api: API, timeout?: number): Promise<T> {
         try {
             const response = await page.waitForResponse(
                 (response: Response) =>
                     ApiInterception.urlIncludes(response.url(), api.url, api.searchParams)
                     && ApiInterception.urlNotIncludes(response.url(), api.avoidParams)
                     && (api.status === response.status() || response.ok())
+                , { timeout: timeout ? timeout : this.timeoutApi }
             )
             return await response.json() as T
         } catch (error) {
-            error.message = error.message + ', ' + `${api.url}, ${api.searchParams}, ${api.status}`
+            error.message = error.message + ' > ' + `${api.url}, ${api.searchParams}, ${api.status}`
             throw error
         }
     }
 
 
-    static async waitForRequestObject<T>(api: API): Promise<Readonly<T>> {
+    static async waitForRequestObject<T>(api: API, timeout?: number): Promise<Readonly<T>> {
         try {
             const request = await page.waitForRequest(
                 (request: Request) =>
                     ApiInterception.urlIncludes(request.url(), api.url, api.searchParams)
                     && ApiInterception.urlNotIncludes(request.url(), api.avoidParams)
                     && request.failure() === null
+                , { timeout: timeout ? timeout : this.timeoutApi }
             )
             return request.postDataJSON() as T
         } catch (error) {
-            error.message = error.message + ', ' + `${api.url}, ${api.searchParams}, ${api.status}`
+            error.message = error.message + ' > ' + `${api.url}, ${api.searchParams}, ${api.status}`
+            throw error
+        }
+    }
+
+
+    static async waitForResponseRequestObject<T>(api: API, timeout?: number): Promise<Readonly<T>> {
+        try {
+            const request = await page.waitForRequest(
+                (request: Request) =>
+                    ApiInterception.urlIncludes(request.url(), api.url, api.searchParams)
+                    && ApiInterception.urlNotIncludes(request.url(), api.avoidParams)
+                    && request.failure() === null
+                , { timeout: timeout ? timeout : this.timeoutApi }
+            )
+            const responseRequest = await request.response()
+            return await responseRequest.json() as T
+        } catch (error) {
+            error.message = error.message + ' > ' + `${api.url}, ${api.searchParams}, ${api.status}`
             throw error
         }
     }
@@ -59,14 +81,14 @@ export abstract class ApiInterception {
         url = url.toLowerCase()
         return (
             url.includes(apiUrl.toLowerCase())
-            && (params ? params.every(param => url.includes(encodeURIComponent(param).toLowerCase())) : true)
+            && (params ? params.every(param => url.includes(encodeURI(param).toLowerCase())) : true)
         )
     }
 
     private static urlNotIncludes(url: string, avoidParams?: string[]): boolean {
         url = url.toLowerCase()
         return (
-            avoidParams ? avoidParams.every(avoidParam => !url.includes(encodeURIComponent(avoidParam).toLowerCase())) : true
+            avoidParams ? avoidParams.every(avoidParam => !url.includes(encodeURI(avoidParam).toLowerCase())) : true
         )
     }
 

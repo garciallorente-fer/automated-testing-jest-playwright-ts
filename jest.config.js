@@ -203,6 +203,6 @@ module.exports = {
     // Whether to use watchman for file crawling
     // watchman: true,
 
-    testTimeout: 65000 // Each "test()" timeout
+    testTimeout: 95000 // Each "test()" timeout
     // Jest default timeout is 15000
 }

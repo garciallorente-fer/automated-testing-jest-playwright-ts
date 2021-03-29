@@ -4,8 +4,8 @@ import { valueProperty } from 'components/data'
 
 export class CustomComponentHomePage extends FormElement {
 
-    private readonly toggleButton = new Button('.className-toggle', { parentSelector: this.parentSelector, idSelector: this.selector })
-    private readonly optionButton = new Button('.className-result', { parentSelector: this.parentSelector, idSelector: this.selector })
+    private readonly toggleButton = new Button('.className-toggle', this.parentSelector)
+    private readonly optionButton = new Button('.className-result', this.parentSelector)
 
 
     public async checkState(state?: { invalid?: true | 'ignore', hidden?: true, disabled?: true }): Promise<void> {
