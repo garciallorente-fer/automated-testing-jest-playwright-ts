@@ -1,5 +1,5 @@
 import { ElementHandle, JSHandle } from 'playwright-core'
-import { disabledProperty, classNameProperty } from 'components/data'
+import { disabledProperty, classNameProperty, valueProperty } from 'components/data'
 import waitForExpect from 'wait-for-expect'
 
 
@@ -7,54 +7,48 @@ export class Element {
 
     protected readonly selector: string
     protected readonly parentSelector: string
-    protected readonly idSelector: string
-    protected readonly parentEngineSelector: string
 
-    constructor(selector: string, parent?: { parentSelector: string, idSelector?: string }) {
-        this.selector = selector
-        this.parentSelector = parent?.parentSelector
-        this.idSelector = parent?.idSelector
-        this.parentEngineSelector = parent ?
-            `*css=${parent.parentSelector} >> ${parent.idSelector ? parent.idSelector : selector}`
-            : undefined
+    constructor(selector: string, parentSelector?: string) {
+        this.selector = parentSelector ? `${parentSelector} ${selector}` : selector
+        this.parentSelector = parentSelector ? `${parentSelector}:has(${selector})` : undefined
     }
+
+    protected readonly timeoutWaitForExpect = 30000
 
 
     protected async getElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        if (this.parentEngineSelector) {
-            const parentElement = await page.waitForSelector(this.parentEngineSelector, { state: 'attached' })
-            return await parentElement.waitForSelector(this.selector, { state: 'attached' })
-        }
         return await page.waitForSelector(this.selector, { state: 'attached' })
     }
 
-    protected async getParentElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        return await page.waitForSelector(this.parentEngineSelector, { state: 'attached' })
+    protected async getElements(): Promise<ElementHandle<SVGElement | HTMLElement>[]> {
+        return await page.$$(this.selector)
     }
 
-
     protected async getElementByInnerHtml(innerHtmls: string[]): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        let elements: ElementHandle<SVGElement | HTMLElement>[]
-        if (this.parentEngineSelector) {
-            const parentElement = await page.waitForSelector(this.parentEngineSelector, { state: 'attached' })
-            await expect(parentElement).toHaveSelector(this.selector, { state: 'attached' })
-            elements = await parentElement.$$(this.selector)
-        } else {
-            await expect(page).toHaveSelector(this.selector, { state: 'attached' })
-            elements = await page.$$(this.selector)
-        }
+        const elementInnerHtmls: string[] = []
+        const elements = await this.getElements()
         for (const element of elements) {
-            const elementInnerHtml = (await element.innerHTML()).toLowerCase()
-            if (innerHtmls.every(innerHtml => elementInnerHtml.includes(innerHtml.toLowerCase()))) {
+            const elementInnerHtml = await element.innerHTML()
+            elementInnerHtmls.push(elementInnerHtml)
+            if (innerHtmls.every(innerHtml => elementInnerHtml.toLowerCase().includes(innerHtml.toLowerCase()))) {
                 return element
             }
         }
+        throw new Error(`Custom Error! None of these innerHtmls: ${innerHtmls} >> matched these elementInnerHtml: ${elementInnerHtmls}`)
+    }
+
+    protected async getParentElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
+        return await page.waitForSelector(this.parentSelector, { state: 'attached' })
     }
 
 
-    public async exists(state?: { hidden?: true, disabled?: true }): Promise<void> {
-        await this.checkHiddenState(state?.hidden)
-        await this.checkDisabledState(state?.disabled)
+    public async exists(state?: { hidden?: true, disabled?: true, notExists?: boolean }): Promise<void> {
+        if (state?.notExists) {
+            await expect(page).not.toHaveSelector(this.selector, { timeout: 500 })
+        } else {
+            await this.checkHiddenState(state?.hidden)
+            await this.checkDisabledState(state?.disabled)
+        }
     }
 
     protected async checkHiddenState(hidden?: true): Promise<void> {
@@ -63,14 +57,14 @@ export class Element {
             if (hidden) {
                 await waitForExpect(async () => {
                     expect(await element.isHidden()).toBeTruthy()
-                }, 30000)
+                }, this.timeoutWaitForExpect)
             } else {
                 await waitForExpect(async () => {
                     expect(await element.isVisible()).toBeTruthy()
-                }, 30000)
+                }, this.timeoutWaitForExpect)
             }
         } catch (error) {
-            error.message = error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
+            error.message = error.message + ' > ' + this.selector
             throw error
         }
     }
@@ -84,22 +78,22 @@ export class Element {
                 if (isEnabled && isEditable) {
                     await waitForExpect(async () => {
                         expect(await this.getElementProperty<boolean>([classNameProperty])).toContain(disabledProperty)
-                    }, 30000)
+                    }, this.timeoutWaitForExpect)
                     return
                 }
                 await waitForExpect(async () => {
                     expect(await element.isDisabled() || !await element.isEditable()).toBeTruthy()
-                }, 30000)
+                }, this.timeoutWaitForExpect)
                 return
             }
             await waitForExpect(async () => {
                 expect(await element.isEnabled()).toBeTruthy()
-            }, 30000)
+            }, this.timeoutWaitForExpect)
             await waitForExpect(async () => {
                 expect(await this.getElementProperty<boolean>([classNameProperty])).not.toContain(disabledProperty)
-            }, 30000)
+            }, this.timeoutWaitForExpect)
         } catch (error) {
-            error.message = error.message + ', ' + `${this.selector}, ${this.parentEngineSelector ? this.parentEngineSelector : null}`
+            error.message = error.message + ' > ' + this.selector
             throw error
         }
     }
@@ -112,6 +106,11 @@ export class Element {
         }
         const propertyValue: T = await propertyHandle.jsonValue()
         return propertyValue
+    }
+
+
+    public async getValue(): Promise<string> {
+        return await this.getElementProperty<string>([valueProperty])
     }
 
 
@@ -132,9 +131,11 @@ export class Element {
     }
 
 
-    public async checkExistingText(text: string): Promise<void> {
+    public async checkExistingText(textParams: string[]): Promise<void> {
         const element = await this.getElement()
-        await element.waitForSelector(`text=${text}`)
+        for (const text of textParams) {
+            await element.waitForSelector(text.includes('"') ? `text=/${text}/s` : `text=${text}`)
+        }
     }
 
 
@@ -147,5 +148,24 @@ export class Element {
         const element = await this.getElement()
         await expect(element).not.toHaveSelector(innerElementsSelector, { timeout: 500 })
     }
+
+
+    public async checkActive(isActive: boolean): Promise<void> {
+        isActive ?
+            await waitForExpect(async () => {
+                expect((await this.getElementProperty<string>([classNameProperty])).includes('active')).toBeTruthy()
+            }, this.timeoutWaitForExpect)
+            :
+            await waitForExpect(async () => {
+                expect((await this.getElementProperty<string>([classNameProperty])).includes('active')).toBeFalsy()
+            }, this.timeoutWaitForExpect)
+    }
+
+
+    public async scrollTo(): Promise<void> {
+        const element = await this.getElement()
+        await element.scrollIntoViewIfNeeded()
+    }
+
 
 }

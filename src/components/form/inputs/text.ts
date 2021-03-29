@@ -5,7 +5,9 @@ import { valueProperty } from 'components/data'
 export class TextInput extends FormElement {
 
 
-    public async fillValue(textValue: string, delay?: number, stateAfter?: { hidden?: true, disabled?: true }): Promise<void> {
+    public async fillValue(
+        textValue: string, delay?: number, stateAfter?: { invalid?: true | 'ignore', hidden?: true, disabled?: true }
+    ): Promise<void> {
         const element = await this.getElement()
         if (delay) {
             await element.type(textValue, { delay: delay })
@@ -18,9 +20,9 @@ export class TextInput extends FormElement {
     }
 
 
-    public async checkExistingText(text: string): Promise<void> {
+    public async checkExistingText(textParams: string[]): Promise<void> {
         const propertyValue = await this.getElementProperty<string>([valueProperty])
-        expect(propertyValue.toLowerCase()).toContain(text.toLowerCase())
+        expect(textParams.every(text => propertyValue.toLowerCase().includes(text))).toBeTruthy()
     }
 
 

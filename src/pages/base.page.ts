@@ -11,19 +11,24 @@ export class BasePage {
         readonly title: string
     }
 
+    protected readonly timeoutVwsPage = 85000
+
 
     public async navigateTo(): Promise<void> {
-        await page.goto(this.page.url, { timeout: 40000 })
+        await Promise.all([
+            page.goto(this.page.url, { timeout: this.timeoutVwsPage }),
+            page.waitForNavigation({ waitUntil: 'networkidle', timeout: this.timeoutVwsPage })
+        ])
     }
 
 
     public async check(): Promise<void> {
         await waitForExpect(async () => {
             expect((await page.title()).toLowerCase()).toContain(this.page.title.toLowerCase())
-        }, 40000)
+        }, this.timeoutVwsPage)
         await waitForExpect(() => {
             expect(page.url().toLowerCase()).toContain(this.page.url.toLowerCase())
-        }, 40000)
+        }, this.timeoutVwsPage)
     }
 
 

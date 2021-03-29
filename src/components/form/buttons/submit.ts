@@ -5,7 +5,7 @@ export class SubmitButton extends FormElement {
 
 
     public async exists(state?: { hidden?: true, disabled?: true }, wrapperState?: { hiddenWrapper: true }): Promise<void> {
-        this.parentEngineSelector && await this.wrapperExists(wrapperState)
+        this.parentSelector && await this.wrapperExists(wrapperState)
         await this.checkState({ invalid: 'ignore', hidden: state?.hidden, disabled: state?.disabled })
     }
 

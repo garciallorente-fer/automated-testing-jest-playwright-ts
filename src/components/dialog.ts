@@ -10,7 +10,7 @@ export class Dialog {
     }
 
 
-    protected async getDiv(): Promise<ElementHandle<SVGElement | HTMLElement>> {
+    protected async getDialog(): Promise<ElementHandle<SVGElement | HTMLElement>> {
         return await page.waitForSelector(this.dialogSelector, { state: 'attached' })
     }
 

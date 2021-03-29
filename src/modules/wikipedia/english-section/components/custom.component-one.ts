@@ -4,8 +4,8 @@ import { valueProperty } from 'components/data'
 
 export class CustomComponentExample extends FormElement {
 
-    private readonly textInput = new TextInput('.textInput-class', { parentSelector: this.parentSelector, idSelector: this.selector })
-    private readonly optionButton = new Button('.resultButton-class', { parentSelector: this.parentSelector, idSelector: this.selector })
+    private readonly textInput = new TextInput('.textInput-class', this.parentSelector)
+    private readonly optionButton = new Button('.resultButton-class', this.parentSelector)
 
 
     public async checkState(state?: { invalid?: true | 'ignore', hidden?: true, disabled?: true }): Promise<void> {
