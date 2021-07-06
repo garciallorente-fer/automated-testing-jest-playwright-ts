@@ -15,7 +15,8 @@ class CustomEnvironment extends JestPlaywrightPresetEnvironment {
             const specName = event.test.name.replace(/\W/g, '-')
 
             await this.global.page.screenshot({
-                path: `screenshots/${this.global.browserName}_${parentName}__${specName}.png`
+                path: `screenshots/${this.global.browserName}_${parentName}__${specName}.png`,
+                fullPage: true, timeout: 2000
             })
         }
 

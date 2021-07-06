@@ -5,13 +5,17 @@ import { valueProperty } from 'components/data'
 export class SelectInput extends FormElement {
 
 
-    public async selectOption(optionName: string, optionId?: string, stateAfter?: { hidden?: true, disabled?: true }): Promise<void> {
+    public async selectOption(
+        option: { value?: string, label?: string, index?: number }, stateAfter?: { hidden?: true, disabled?: true }
+    ): Promise<void> {
         const element = await this.getElement()
-        const selectedOption = await element.selectOption(optionName)
-        expect(selectedOption[0].toLowerCase()).toContain(optionName.toLowerCase())
+        const selectedOption = await element.selectOption({ value: option.value, label: option.label, index: option.index })
         await this.checkState(stateAfter)
         const propertyValue = await this.getElementProperty<string>([valueProperty])
-        expect(propertyValue.toLowerCase()).toContain(optionId ? optionId.toLowerCase() : optionName.toLowerCase())
+        if(option.value){
+            expect(selectedOption[0].toLowerCase()).toContain(option.value.toLowerCase())
+            expect(propertyValue.toLowerCase()).toContain(option.value.toLowerCase())
+        }
     }
 
 }
