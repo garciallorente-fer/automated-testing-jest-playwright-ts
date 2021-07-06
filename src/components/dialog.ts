@@ -9,19 +9,21 @@ export class Dialog {
         this.dialogSelector = dialogSelector
     }
 
+    protected readonly timeoutDialog = 60000
+
 
     protected async getDialog(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        return await page.waitForSelector(this.dialogSelector, { state: 'attached' })
+        return await page.waitForSelector(this.dialogSelector, { state: 'attached', timeout: this.timeoutDialog })
     }
 
 
     public async exists(): Promise<void> {
-        await expect(page).toHaveSelector(this.dialogSelector)
+        await this.getDialog()
     }
 
 
     public async notExists(): Promise<void> {
-        await expect(page).not.toHaveSelector(this.dialogSelector, { timeout: 500 })
+        await page.waitForSelector(this.dialogSelector, { state: 'detached', timeout: this.timeoutDialog })
     }
 
 }

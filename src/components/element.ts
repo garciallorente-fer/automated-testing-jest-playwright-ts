@@ -13,14 +13,15 @@ export class Element {
         this.parentSelector = parentSelector ? `${parentSelector}:has(${selector})` : undefined
     }
 
-    protected readonly timeoutWaitForExpect = 30000
+    protected readonly timeoutElement = 60000
 
 
     protected async getElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        return await page.waitForSelector(this.selector, { state: 'attached' })
+        return await page.waitForSelector(this.selector, { state: 'attached', timeout: this.timeoutElement })
     }
 
     protected async getElements(): Promise<ElementHandle<SVGElement | HTMLElement>[]> {
+        await page.waitForSelector(this.selector, { state: 'attached', timeout: this.timeoutElement })
         return await page.$$(this.selector)
     }
 
@@ -34,21 +35,17 @@ export class Element {
                 return element
             }
         }
-        throw new Error(`Custom Error! None of these innerHtmls: ${innerHtmls} >> matched these elementInnerHtml: ${elementInnerHtmls}`)
+        throw new Error(`None of these innerHtmls: ${innerHtmls} >> were found in these elementInnerHtmls: ${elementInnerHtmls}`)
     }
 
     protected async getParentElement(): Promise<ElementHandle<SVGElement | HTMLElement>> {
-        return await page.waitForSelector(this.parentSelector, { state: 'attached' })
+        return await page.waitForSelector(this.parentSelector, { state: 'attached', timeout: this.timeoutElement })
     }
 
 
-    public async exists(state?: { hidden?: true, disabled?: true, notExists?: boolean }): Promise<void> {
-        if (state?.notExists) {
-            await expect(page).not.toHaveSelector(this.selector, { timeout: 500 })
-        } else {
-            await this.checkHiddenState(state?.hidden)
-            await this.checkDisabledState(state?.disabled)
-        }
+    public async exists(state?: { hidden?: true, disabled?: true }): Promise<void> {
+        await this.checkHiddenState(state?.hidden)
+        await this.checkDisabledState(state?.disabled)
     }
 
     protected async checkHiddenState(hidden?: true): Promise<void> {
@@ -57,15 +54,15 @@ export class Element {
             if (hidden) {
                 await waitForExpect(async () => {
                     expect(await element.isHidden()).toBeTruthy()
-                }, this.timeoutWaitForExpect)
+                }, this.timeoutElement)
             } else {
                 await waitForExpect(async () => {
                     expect(await element.isVisible()).toBeTruthy()
-                }, this.timeoutWaitForExpect)
+                }, this.timeoutElement)
             }
         } catch (error) {
-            error.message = error.message + ' > ' + this.selector
-            throw error
+            error.message = 'Hidden=' + hidden + ' > ' + error.message + ' > ' + this.selector
+            throw new Error(error.message)
         }
     }
 
@@ -77,24 +74,24 @@ export class Element {
             if (disabled) {
                 if (isEnabled && isEditable) {
                     await waitForExpect(async () => {
-                        expect(await this.getElementProperty<boolean>([classNameProperty])).toContain(disabledProperty)
-                    }, this.timeoutWaitForExpect)
+                        expect(await this.getElementProperty<string>([classNameProperty])).toContain(disabledProperty)
+                    }, this.timeoutElement)
                     return
                 }
                 await waitForExpect(async () => {
                     expect(await element.isDisabled() || !await element.isEditable()).toBeTruthy()
-                }, this.timeoutWaitForExpect)
+                }, this.timeoutElement)
                 return
             }
             await waitForExpect(async () => {
                 expect(await element.isEnabled()).toBeTruthy()
-            }, this.timeoutWaitForExpect)
+            }, this.timeoutElement)
             await waitForExpect(async () => {
-                expect(await this.getElementProperty<boolean>([classNameProperty])).not.toContain(disabledProperty)
-            }, this.timeoutWaitForExpect)
+                expect(await this.getElementProperty<string>([classNameProperty])).not.toContain(disabledProperty)
+            }, this.timeoutElement)
         } catch (error) {
-            error.message = error.message + ' > ' + this.selector
-            throw error
+            error.message = 'Disabled=' + disabled + ' > ' + error.message + ' > ' + this.selector
+            throw new Error(error.message)
         }
     }
 
@@ -122,7 +119,7 @@ export class Element {
 
     public async getInnerElement(innerElementSelector: string): Promise<ElementHandle<SVGElement | HTMLElement>> {
         const element = await this.getElement()
-        return await element.waitForSelector(innerElementSelector)
+        return await element.$(innerElementSelector)
     }
 
     public async getInnerElements(innerElementsSelector: string): Promise<ElementHandle<SVGElement | HTMLElement>[]> {
@@ -134,38 +131,37 @@ export class Element {
     public async checkExistingText(textParams: string[]): Promise<void> {
         const element = await this.getElement()
         for (const text of textParams) {
-            await element.waitForSelector(text.includes('"') ? `text=/${text}/s` : `text=${text}`)
+            await element.waitForSelector(
+                text.includes('"') ? `text=/${text}/s` : `text=${text}`, { timeout: this.timeoutElement })
         }
     }
 
 
     public async notExists(): Promise<void> {
-        await expect(page).not.toHaveSelector(this.selector, { timeout: 500 })
+        await page.waitForSelector(this.selector, { state: 'detached', timeout: this.timeoutElement })
     }
 
 
-    public async innerNotExists(innerElementsSelector: string): Promise<void> {
+    public async innerElementNotExists(innerElementsSelector: string): Promise<void> {
         const element = await this.getElement()
-        await expect(element).not.toHaveSelector(innerElementsSelector, { timeout: 500 })
+        await element.waitForSelector(innerElementsSelector, { state: 'detached', timeout: this.timeoutElement })
     }
 
 
     public async checkActive(isActive: boolean): Promise<void> {
-        isActive ?
-            await waitForExpect(async () => {
-                expect((await this.getElementProperty<string>([classNameProperty])).includes('active')).toBeTruthy()
-            }, this.timeoutWaitForExpect)
-            :
-            await waitForExpect(async () => {
-                expect((await this.getElementProperty<string>([classNameProperty])).includes('active')).toBeFalsy()
-            }, this.timeoutWaitForExpect)
+        try {
+            isActive ?
+                await waitForExpect(async () => {
+                    expect(await this.getElementProperty<string>([classNameProperty])).toContain('active')
+                }, this.timeoutElement)
+                :
+                await waitForExpect(async () => {
+                    expect(await this.getElementProperty<string>([classNameProperty])).not.toContain('active')
+                }, this.timeoutElement)
+        } catch (error) {
+            error.message = 'Active=' + isActive + ' > ' + error.message + ' > ' + this.selector
+            throw new Error(error.message)
+        }
     }
-
-
-    public async scrollTo(): Promise<void> {
-        const element = await this.getElement()
-        await element.scrollIntoViewIfNeeded()
-    }
-
 
 }

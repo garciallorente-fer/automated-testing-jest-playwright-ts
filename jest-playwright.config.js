@@ -7,5 +7,5 @@ module.exports = {
     // },
 
     browsers: ['chromium', 'webkit', 'firefox'] // 'chromium', 'webkit', 'firefox'
-    // devices: ['iPhone 11']
+    // devices: ['iPhone 12']
 }

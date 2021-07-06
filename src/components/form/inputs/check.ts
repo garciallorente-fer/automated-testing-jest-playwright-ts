@@ -17,7 +17,7 @@ export class CheckInput extends FormElement {
         if (this.checkValues) {
             return await this.getElementByValue(this.checkValues)
         } else {
-            return await page.waitForSelector(this.selector, { state: 'attached' })
+            return await page.waitForSelector(this.selector, { state: 'attached', timeout: this.timeoutElement })
         }
     }
 

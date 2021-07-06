@@ -11,29 +11,26 @@ export class BasePage {
         readonly title: string
     }
 
-    protected readonly timeoutVwsPage = 85000
+    protected readonly timeoutBasePage = 85000
 
 
     public async navigateTo(): Promise<void> {
-        await Promise.all([
-            page.goto(this.page.url, { timeout: this.timeoutVwsPage }),
-            page.waitForNavigation({ waitUntil: 'networkidle', timeout: this.timeoutVwsPage })
-        ])
+        await page.goto(this.page.url, { timeout: this.timeoutBasePage })
     }
 
 
     public async check(): Promise<void> {
-        await waitForExpect(async () => {
-            expect((await page.title()).toLowerCase()).toContain(this.page.title.toLowerCase())
-        }, this.timeoutVwsPage)
-        await waitForExpect(() => {
-            expect(page.url().toLowerCase()).toContain(this.page.url.toLowerCase())
-        }, this.timeoutVwsPage)
+        await Promise.all([
+            page.waitForURL(page.url(), { timeout: this.timeoutBasePage }),
+            waitForExpect(async () => {
+                expect((await page.title()).toLowerCase()).toContain(this.page.title.toLowerCase())
+            }, this.timeoutBasePage)
+        ])
     }
 
 
     public async takeScreenshot(testName: string): Promise<void> {
-        await page.screenshot({ path: `screenshots/${browserName}_${testName}.png` })
+        await page.screenshot({ path: `screenshots/${browserName}_${testName}.png`, fullPage: true, timeout: 7500 })
     }
 
 

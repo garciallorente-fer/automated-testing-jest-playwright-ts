@@ -27,7 +27,7 @@ export class TextInput extends FormElement {
 
 
     public async deleteText(): Promise<void> {
-        const element = await page.waitForSelector(this.selector, { state: 'visible' })
+        const element = await page.waitForSelector(this.selector, { state: 'visible', timeout: this.timeoutElement })
         await element.selectText()
         await page.keyboard.press('Backspace', { delay: 100 })
     }
